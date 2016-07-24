@@ -1,0 +1,580 @@
+@@ -1,579 +0,0 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <conio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+#include <windows.h>
+
+struct bank_details{
+	int id;
+	char first_name[50];
+	char last_name[50];
+	char address[50];
+	float drawings;
+	char type[50];
+	time_t interest_time;
+};
+
+void new_entry();
+void withdraw_deposit();
+void edit();
+void history();
+void write_log(int x, struct bank_details details);
+void create_file();
+int check_file();
+int error(char check[],int opt);
+void interest(struct bank_details int_det);
+
+main(){
+	char choice[5]="1";
+	for ( int x = 0 ; x < 8 ; x++ ){
+   	    printf("welcome!\n");
+   	    if ( x == 7 ){
+   	    	create_file();
+   	    }
+   	    printf("Loading Please wait ");
+        for ( int y = 0 ; y < 10 ; y++ ){
+            Sleep(50);
+            printf(".");
+            }
+             system("cls");
+        }
+    
+    for ( ; ; ){
+    	
+	printf("[1] - New Entry\n[2] - Edit details \n[3] - Transact \n[4] - View \n[0] - Exit\n");
+	printf("Enter: ");
+	gets(choice);
+	
+	if ( atoi(choice) == 1 && error(choice,1) == 0 ){
+		system("cls");
+		new_entry();
+	}
+	else if ( atoi(choice) == 2 && error(choice,1) == 0 ){
+		system("cls");
+		edit();
+	}
+	else if ( atoi(choice) == 3 && error(choice,1) == 0 ){
+		system("cls");
+		withdraw_deposit();
+	}
+	else if ( atoi(choice) == 4 && error(choice,1) == 0 ){
+		system("cls");
+		history();
+		system("pause");
+		system("cls");
+	}
+	else if ( atoi(choice) == 147258){
+		FILE *check;
+		check = fopen("data.dat","rb+");
+		printf("%d\n", check_file());
+		fclose(check);
+	}
+	else if ( atoi(choice) == 0 && error(choice,1) == 0 ){
+		break;
+		}
+	else {
+		printf("You enter a invalid input.\n");
+		system("pause");
+		system("cls");
+	}
+	
+}
+	system("cls");
+	printf("Goodbye!");
+
+getch();
+
+}
+
+void new_entry(){
+	struct bank_details entry={0,"","","",0.0};
+	FILE *dataR;
+	char id[10], type[10];
+	dataR=fopen("data.dat","rb+");
+	
+	if ( dataR == NULL){
+		printf("File not found!\n");
+		}
+	else{
+	for ( int x = 0 ; x != 1 ; ){
+		if ( check_file() >= 30 ){
+			x=1;
+			printf("File is full. ");
+			break;
+			}
+			
+		printf("Enter ID: ");
+		gets(id);
+		
+		if ( atoi(id) == 9999 ){
+             rewind(dataR);
+             for ( int ctr = 1 ; ctr != 31 ; ctr++ ){
+             	fread(&entry,sizeof(struct bank_details),1,dataR);
+             	if (entry.id != ctr ){
+             		entry.id = ctr;
+                	fseek( dataR , sizeof(struct bank_details) * (ctr-1) , SEEK_SET );
+                	fwrite(&entry,sizeof(struct bank_details),1,dataR);
+                	}
+             	}
+             x++;
+             }
+             
+		else if ( error(id,1) == 1 ){
+			system("cls");
+			}
+			
+        else if ( atoi(id) >= 31){
+			printf("You exceed the maximum ID. ");
+			system("pause");
+			system("cls");
+			}
+			
+		else {
+			fseek( dataR , sizeof(struct bank_details) * (atoi(id)-1) , SEEK_SET );
+			fread(&entry,sizeof(struct bank_details),1,dataR);
+			if (entry.id == atoi(id) ){
+				printf("The ID is already use.\n");
+				system("pause");
+				system("cls");
+				}
+				
+			else {
+				entry.id = atoi(id);
+				system("cls");
+				for ( int y = 0 ; y != 1 ;){
+					printf("Enter First Name: ");
+					gets(entry.first_name);
+					if ( error(entry.first_name,2)==1){
+						system("cls");
+					}
+					else
+					y++;
+				}
+				system("cls");
+				for ( int y = 0 ; y != 1 ;){
+					printf("Enter Last Name: ");
+            		gets(entry.last_name);
+					if ( error(entry.last_name,2)==1){
+						system("cls");
+					}
+					else
+					y++;
+            	}
+            	system("cls");
+				printf("Enter Address: ");
+				gets(entry.address);
+				system("cls");
+				for ( int y = 0 ; y != 1 ;){
+					printf("Enter type of account: \n");
+					printf("[1] - Regular \n[2] - Express \n[3] - Premium \n[4] - Gold \n[5] - Luxury \n");
+					gets(type);
+					if ( atoi(type) == 1 && error(type,1) == 0){
+						strcpy(entry.type,"Regular");
+						y++;
+						}
+					else if ( atoi(type) == 2 && error(type,1) == 0){
+						strcpy(entry.type,"Express");
+						y++;
+						}
+					else if ( atoi(type) == 3 && error(type,1) == 0){
+						strcpy(entry.type,"Premium");
+						y++;
+						}
+					else if ( atoi(type) == 4 && error(type,1) == 0){
+						strcpy(entry.type,"Gold");
+						y++;
+						}
+					else if ( atoi(type) == 5 && error(type,1) == 0){
+						strcpy(entry.type,"Luxury");
+						y++;
+						}
+					else {
+						printf("Wrong Input \n");
+						}
+					}
+					system("cls");
+				for ( int y = 0 ; y != 1 ;){
+					printf("\nEnter Amount: P ");
+					gets(id);
+					if ( error(id,1) == 1 ){
+						printf("Invalid input. \n\n");
+						}
+					else if ( atoi(id) > 100000 ){
+						printf("You exceed maxinum Deposit of P 100,000.\n");
+						}
+					else{
+						y++;
+						}
+					}	
+					x=1;
+				}
+			}
+		}
+	entry.drawings = atoi(id);
+	entry.interest_time = time(NULL);		
+	fseek( dataR , sizeof(struct bank_details) * (entry.id-1) , SEEK_SET );
+	fwrite( &entry , sizeof(struct bank_details) , 1 , dataR );
+	fclose(dataR);
+	write_log(1,entry);
+    }
+	system("pause");
+	system("cls");
+}
+
+void withdraw_deposit(){
+	struct bank_details trans;
+    char a[10],b[10],cash[20];
+    FILE *data;
+    
+    data = fopen("data.dat","rb+");
+    if ( data == NULL){
+		printf("File not found!\n");
+		}
+	else if ( check_file() == 0 ){
+		printf("File is empty. ");
+		}
+	else{
+		for ( int x = 0 ; x != 1 ;){
+			printf("[1] - Deposit \n[2] - Withdraw \n");
+         	gets(a);
+			if ( error(a,1) == 1 || atoi(a) != 1 && atoi(a) != 2 ){
+       			printf("Wrong input.");
+    			system("pause");
+   	 			system("cls");
+ 				}
+			else{
+ 				x++;
+ 				}
+ 			}
+		for ( int y = 0 ; y != 1 ; ){
+			system("cls");
+			history(); 
+   	       	printf("Enter ID: ");
+ 		   	gets(b);
+ 		    if (error(b,1)==1){
+ 		       	printf("Invalid Input.\n");
+ 		   		system("pause");
+				}
+			else{
+   			    fseek( data , sizeof(struct bank_details) * (atoi(b)-1) , SEEK_SET );
+	   			fread(&trans,sizeof(struct bank_details),1,data);
+				if (trans.id != atoi(b) ){
+					printf("ID not found.\n");
+					system("pause");
+					}
+				else{
+					break;
+				}
+			}
+		}
+		
+    	system("cls");                      
+   					
+		if ( atoi(a) == 1 ){
+     		for ( int ctr = 0 ; ctr != 1 ; ){
+     			fseek( data , sizeof(struct bank_details) * (atoi(b) - 1), SEEK_SET );
+    			fread( &trans , sizeof(struct bank_details) , 1 , data );
+				printf("Balance: %.2f", trans.drawings);
+				printf("\nEnter Deposit amount: ");
+     			gets(cash);
+     			if ( error(cash,1) == 1){
+	     			printf("Invalid Input. \n");
+	     			system("pause");
+    	 			system("cls");
+					}
+				else{
+					trans.drawings += atoi(cash);
+     				printf("\nThe new balance is now %.2f", trans.drawings);
+    				write_log(4,trans);
+    				ctr++;
+					}
+				}
+			}
+							
+		else if ( atoi(a) == 2 ){
+     		for ( int ctr = 0 ; ctr != 1 ; ){
+     			fseek( data , sizeof(struct bank_details) * (atoi(b) - 1), SEEK_SET );
+    			fread( &trans , sizeof(struct bank_details) , 1 , data );
+				printf("Balance: %.2f", trans.drawings);
+     			printf("\nEnter Withdraw amount: ");
+     			gets(cash);
+     			if ( error(cash,1) == 1){
+	     			printf("Invalid Input. \n");
+	     			system("pause");
+    	 			system("cls");
+					}
+				else{
+					if( atoi(cash) > trans.drawings){
+						printf("\nThe amount withdraw is bigger than the current balance.\n");
+						system("pause");
+    	 				system("cls");
+						}
+					else{
+     					trans.drawings -= atoi(cash);
+     					printf("\nThe remaining balance is now %.2f", trans.drawings);
+						ctr++;	
+     					write_log(4,trans);
+     					}
+			     	}
+    			}
+			fseek( data , sizeof(struct bank_details) * (atoi(b) - 1), SEEK_SET );
+    		fwrite( &trans , sizeof(struct bank_details) , 1 , data );		
+    		}
+    	}
+	fclose(data);
+    system("pause");
+    system("cls");
+}
+
+void edit(){
+	struct bank_details editted;
+    char a[10],b[10];
+    FILE *data;
+     
+    data = fopen("data.dat","rb+");
+    if ( data == NULL){
+		printf("File not found!\n");
+		}
+	else if ( check_file() == 0){
+		printf("File is empty. ");
+		}
+	else{
+    	for ( int x = 0 ; x != 1 ; ){	
+    		system("cls");
+    		history();
+        	printf("\nEnter ID: ");
+        	gets(a);
+        	if ( error(a,1) == 1){
+        		printf("Invalid Input. \n");
+        		system("pause");
+			}
+			else{
+        		fseek( data , sizeof(struct bank_details) * (atoi(a)-1) , SEEK_SET );
+	    		fread(&editted,sizeof(struct bank_details),1,data);
+				if (editted.id != atoi(a) ){
+					printf("ID not found.\n");
+					system("pause");
+					system("cls");
+					}
+				else{
+					x=1;
+					}
+				}
+			}
+			system("cls"); 
+			for ( int y = 0 ; y != 1 ; ){
+				printf("%-6s%-16s%-12s%-20s%-12s%s\n\n\n","ID","First Name","Last Name","Address","Amount","Account type");
+				printf("%-6d%-16s%-12s%-20s%-12.2f%s\n",editted.id,editted.first_name,editted.last_name,editted.address,editted.drawings,editted.type);
+     			printf("\n\n[1] - Edit name \n[2] - Edit address\n[3] - Delete Account\n");
+     			gets(b);
+     			if ( error(b,1) == 1 ){
+     				printf("Invalid input. ");
+    				system("pause");
+	    			system("cls");
+	 				}
+	 			else{ 
+     				if ( atoi(b) == 1 ){
+     					for ( int ctr = 0 ; ctr != 1 ; ){
+     						system("cls");
+     						printf("Enter First name: ");
+							gets(editted.first_name);
+							if( error(editted.first_name,2) == 1){
+								printf("Invalid Input. ");
+								system("pause");
+							}
+							else{
+								ctr=1;
+								}
+							}
+							
+						for ( int ctr = 0 ; ctr != 1 ; ){
+							system("cls");
+							printf("Enter Last name: ");
+							gets(editted.last_name);
+							if( error(editted.last_name,2) == 1){
+								printf("Invalid Input. ");
+								system("pause");
+								}
+							else{
+								ctr=1;
+								}
+	     					}
+	     					write_log(2,editted);
+	     					y=1;
+	     				}
+	     				
+	     			else if ( atoi(b) == 2 ){
+	     				for ( int ctr = 0 ; ctr != 1 ; ){
+	     					system("cls");
+	 						printf("Enter address: ");
+	 						gets(editted.address);
+	 						if( error(editted.address,2) == 1){
+								printf("Invalid Input. ");
+								system("pause");
+								}
+							else{
+								ctr=1;
+								}
+	     					}
+							write_log(2,editted);
+							y=1;
+	 					}
+	 					
+	 				else if ( atoi(b) == 3 ){
+	 					editted.id = 0;
+	 					printf("ID %d is removed. \n", atoi(a));
+     					write_log(3,editted);
+     					y=1;
+	 					}
+	 				else{
+     					printf("Invalid input. ");
+    					system("pause");
+	    				system("cls");
+					 	}
+					}
+				}
+			fseek( data , sizeof(struct bank_details) * (atoi(a) - 1), SEEK_SET );
+    		fwrite( &editted , sizeof(struct bank_details) , 1 , data );     	
+	 		}
+	fclose(data);
+    system("pause");
+	system("cls");
+}
+
+void history(){
+	struct bank_details entry={0,"","","",0.0};
+	struct tm *current;
+	char p_time[50];
+	int cal_time;
+	FILE *data;
+	time_t date;
+	time(&date);
+	current = localtime(&date);
+	strftime(p_time,50,"%x - %X",current);
+	data=fopen("data.dat","rb+");
+	if ( data == NULL){
+		printf("File not found!\n");
+		}
+	else{
+		while ( !feof(data) ){
+			if(entry.id != 0){
+				interest(entry);
+				printf("|ID: %d\n",entry.id);
+				printf("|First Name: %-12s",entry.first_name);
+				printf("|Last Name: %-12s",entry.last_name);
+				printf("|Address: %-15s\n",entry.address);
+				printf("|Account type: %s\n",entry.type);
+				printf("|Amount(As of %s): %.2f\n",p_time,entry.drawings);
+				printf("------------------------------------------------------------------------------\n");
+				}
+				fread(&entry,sizeof(struct bank_details),1,data);
+                }
+			}
+		
+	
+	fclose(data);
+	
+}
+
+void write_log(int x, struct bank_details details){
+	FILE *log;
+	log = fopen("log.txt","a+");
+	struct tm *current;
+	char p_time[50];
+	float cal_time;
+	time_t date;
+	time(&date);
+	current = localtime(&date);
+	strftime(p_time,50,"%x - %X",current);	
+	
+	if ( x == 1 ){
+		fprintf(log,"New entry:[ID: %d][Account type: %s][Last name: %s][First name: %s][Address: %s][Balance: %.2f][Date created: %s]\n", details.id,details.type,details.last_name,details.first_name,details.address,details.drawings,p_time);
+	}
+	else if ( x == 2 ){
+		fprintf(log,"ID %d update his/her profile. \n", details.id);
+	}
+	else if ( x == 3 ){
+		fprintf(log,"ID %d is remove from the entry. \n", details.id);
+	}
+	else if ( x == 4 ){
+		fprintf(log,"ID %d do transaction and the new balance is now %.2f \n", details.id,details.drawings);
+	}
+	fclose(log);
+	
+}
+
+void create_file(){
+	FILE *log, *data;
+	
+	if ( (log=fopen("log.txt","r")) == NULL ){
+		fclose(log);
+		log = fopen("log.txt","w+");
+		printf("log.txt file succesfuly created.\n");
+	}
+	else {
+		printf("log.txt is already created.\n");
+	}
+	
+	if ( (data=fopen("data.dat","r")) == NULL ){
+		fclose(data);
+		data = fopen("data.dat","w+");
+		printf("data.dat file succesfuly created.\n");
+	}
+	else{
+		printf("data.dat is already created.\n");
+	}
+	fclose(log);
+	fclose(data);
+}
+
+int check_file(){
+	FILE *file;
+	file = fopen("data.dat","rb+");
+	struct bank_details check;
+	int count=0;
+	while ( !feof(file) ){
+			if(check.id != 0){
+				count++;
+				}
+				fread(&check,sizeof(struct bank_details),1,file);
+			}
+	fclose(file);
+	return count-1;
+}
+
+int error(char check[], int opt){
+    if ( opt == 1 ){
+    	for ( int x = 0 ; check[x] != '\0';x++){
+    		if ( isalpha(check[x]) || ispunct(check[x])){
+    			return 1;
+			}
+		}
+		return 0;
+	}
+	else if ( opt == 2 ){
+		for ( int x = 0 ; check[x] != '\0';x++){
+    		if ( isdigit(check[x]) ){
+    			return 1;
+			}
+		}
+		return 0;
+	}
+}
+
+void interest(struct bank_details int_det){
+	FILE *dataC;
+	int cal_time;
+	dataC=fopen("data.dat","rb+");
+	cal_time = (time(NULL) - int_det.interest_time)/60; // adds interest for every 2 mins
+	for ( ; cal_time >= 1 ; ){
+	int_det.drawings = int_det.drawings + ( int_det.drawings *.05);
+	cal_time -= 2;
+	}
+	int_det.interest_time = time(NULL);
+	fseek(dataC,sizeof(struct bank_details)*(int_det.id-1),SEEK_SET);
+	fwrite(&int_det,sizeof(struct bank_details),1,dataC);
+	fclose(dataC);
+}
